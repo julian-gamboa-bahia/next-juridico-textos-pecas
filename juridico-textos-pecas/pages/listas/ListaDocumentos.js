@@ -1,55 +1,49 @@
 import { useState, useEffect } from 'react';
-import Camiseta from '../componentes/Documento';
+import Documento from '../componentes/Documento'; // Componente para exibir cada documento
 
-
-
-const ListaCamisetas = ({ filtros }) => {
-  const [camisetas, setCamisetas] = useState([]);
+const ListaDocumentos = ({ filtros }) => {
+  const [documentos, setDocumentos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/camisetas?nome=${filtros.nome}&preco=${filtros.preco}&tamanho=${filtros.tamanho}&cor=${filtros.cor}`);
+        const queryParams = new URLSearchParams(filtros).toString(); // Converte filtros em query string
+        const response = await fetch(`/api/documentos?${queryParams}`);
         const data = await response.json();
-        setCamisetas(data);
+        setDocumentos(data);
       } catch (error) {
-        console.error('Erro ao buscar camisetas:', error);
+        console.error('Erro ao buscar documentos:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [filtros]);
+  }, [filtros]); // Executa quando os filtros mudam
 
   return (
     <div className="container mx-auto py-8">
-      {isLoading ? (
-        <p className="text-center text-gray-600">Carregando camisetas...</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {camisetas?.map((camiseta) => (
-              <div key={camiseta?.id} className="bg-white rounded-lg overflow-hidden shadow-md">
-
-                <Camiseta 
-                id={camiseta?.id} 
-                imagem={camiseta?.imagem} 
-                nome={camiseta?.nome} 
-                preco={camiseta?.preco} 
-                tamanhos={camiseta?.tamanhos} 
-                cores={camiseta?.cores} />
-                
-              </div>
-            ))}
+      {/* ... (mensagem de carregamento e erro) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {documentos.map((documento) => (
+          <div key={documento.id} className="bg-white rounded-lg overflow-hidden shadow-md p-4">
+            <Documento 
+  id={documento.id}
+  tipo={documento.tipo}
+  numeroProcesso={documento.numeroProcesso}
+  tribunal={documento.tribunal}
+  partes={documento.partes}
+  data={documento.data}
+/>
           </div>
-          {camisetas?.length === 0 && !isLoading && <p className="text-center mt-4 text-orange-800">Nenhuma camiseta encontrada.</p>}
-        </>
-      )}
+        ))}
+      </div>
+      {/* ... (mensagem de nenhum resultado) */}
     </div>
   );
+
 };
 
-export default ListaCamisetas;
+export default ListaDocumentos;
